@@ -1,4 +1,4 @@
-package net.hncu.UI;
+package net.hncu.jzhcoder.UI;
 
 import com.cloudgarden.layout.AnchorConstraint;
 import com.cloudgarden.layout.AnchorLayout;

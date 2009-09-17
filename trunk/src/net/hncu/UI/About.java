@@ -1,4 +1,4 @@
-package net.hncu.UI;
+package net.hncu.jzhcoder.UI;
 
 import java.awt.BorderLayout;
 
