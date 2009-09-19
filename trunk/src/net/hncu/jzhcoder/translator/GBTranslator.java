@@ -17,8 +17,8 @@ public class GBTranslator extends Translator {
 	 */
 	public byte[] unicode2GBTranslate(byte[] unicodeBytes)
 			throws UnsupportedEncodingException {
-		return new String(unicodeBytes, Translator.UNICODE)
-				.getBytes(Translator.GB);
+		return new String(unicodeBytes, Charsets.UTF16LE)
+				.getBytes(Charsets.GB18030);
 	}
 
 	/**
@@ -28,7 +28,7 @@ public class GBTranslator extends Translator {
 	 */
 	public byte[] utf82GBTranslate(byte[] utf8Bytes)
 			throws UnsupportedEncodingException {
-		return new String(utf8Bytes, Translator.UTF_8).getBytes(Translator.GB);
+		return new String(utf8Bytes, Charsets.UTF8).getBytes(Charsets.GB18030);
 	}
 
 }
