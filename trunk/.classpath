@@ -2,5 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="F:/zhangxiaoxiang/jchardet-1.1/jchardet-1.1/dist/lib/chardet.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
