@@ -17,8 +17,8 @@ public class UTF8Translator extends Translator {
 	 */
 	public byte[] unicode2Utf8Translate(byte[] unicodeBytes)
 			throws UnsupportedEncodingException {
-		return new String(unicodeBytes, Translator.UNICODE)
-				.getBytes(Translator.UTF_8);
+		return new String(unicodeBytes, Charsets.UTF16LE)
+				.getBytes(Charsets.UTF8);
 	}
 
 	/**
@@ -28,6 +28,6 @@ public class UTF8Translator extends Translator {
 	 */
 	public byte[] gb2Utf8Translate(byte[] gbBytes)
 			throws UnsupportedEncodingException {
-		return new String(gbBytes, Translator.GB).getBytes(Translator.UTF_8);
+		return new String(gbBytes, Charsets.GB18030).getBytes(Charsets.UTF8);
 	}
 }

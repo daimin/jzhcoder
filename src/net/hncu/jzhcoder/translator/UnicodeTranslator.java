@@ -21,7 +21,7 @@ public class UnicodeTranslator extends Translator {
 	 */
 	public static byte[] gb2UnicodeTranslate(byte[] gbBytes)
 			throws UnsupportedEncodingException {
-		return new String(gbBytes, Translator.GB).getBytes("UTF-16");
+		return new String(gbBytes, Charsets.GB18030).getBytes(Charsets.UTF16LE);
 	}
 
 	/**
@@ -33,7 +33,7 @@ public class UnicodeTranslator extends Translator {
 	 */
 	public static byte[] utf82UnicodeTranslate(byte[] utf8Bytes)
 			throws UnsupportedEncodingException {
-		return new String(utf8Bytes, Translator.UTF_8).getBytes("UTF-16");
+		return new String(utf8Bytes, Charsets.UTF8).getBytes(Charsets.UTF16LE);
 	}
 
 }
