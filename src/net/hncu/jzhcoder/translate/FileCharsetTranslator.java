@@ -26,8 +26,6 @@ public class FileCharsetTranslator {
 
 	public static final int BUF_SIZE = 1024;
 
-	private Translator translator;
-
 	private FileCharsetDetector detector;
 
 	public FileCharsetTranslator() {
@@ -35,21 +33,113 @@ public class FileCharsetTranslator {
 	}
 
 	/**
-	 * 转换GB编码的文件为UTF-8
+	 * 转换文件为UTF-8编码
 	 * 
 	 * @param file
 	 *            被转换的文件
 	 */
-	public void translateToUTF8(File file) throws TranslateException {
-		verifyFile(file);
-		Charset charset = detector.charsetDetect(file);
-		translator = Translator.getTranslator(Charsets.UTF8, charset);
+	public void translateToUTF8(File originalFile, File targetFile)
+			throws TranslateException {
+		Translator translator = Translator.getTranslator(Charsets.UTF8,
+				readyForTranslate(originalFile, targetFile));
+		internalTranslate(originalFile, targetFile, translator);
+
+	}
+
+	/**
+	 * 转换文件为UTF-8编码
+	 * 
+	 * @param filename
+	 *            被转换的文件的文件名
+	 */
+	public void translateToUTF8(String originalFilename, String targetFilename,
+			Charset targetCharset) throws TranslateException {
+		translateToUTF8(new File(originalFilename), new File(targetFilename));
+	}
+
+	/**
+	 * 转换文件为GB18030编码
+	 * 
+	 * @param originalFile
+	 * @param targetFile
+	 * @throws TranslateException
+	 */
+	public void translateToGB(File originalFile, File targetFile)
+			throws TranslateException {
+		Translator translator = Translator.getTranslator(Charsets.GB18030,
+				readyForTranslate(originalFile, targetFile));
+		internalTranslate(originalFile, targetFile, translator);
+	}
+
+	/**
+	 * 转换文件为UTF-8编码
+	 * 
+	 * @param filename
+	 *            被转换的文件的文件名
+	 */
+	public void translateToGB(String originalFilename, String targetFilename)
+			throws TranslateException {
+		translateToGB(new File(originalFilename), new File(targetFilename));
+	}
+
+	/**
+	 * 转换文件为UTF-16LE编码
+	 * 
+	 * @param originalFile
+	 * @param targetFile
+	 * @param targetCharset
+	 * @throws TranslateException
+	 */
+	public void translateToUTF16(File originalFile, File targetFile)
+			throws TranslateException {
+		Translator translator = Translator.getTranslator(Charsets.UTF16LE,
+				readyForTranslate(originalFile, targetFile));
+		internalTranslate(originalFile, targetFile, translator);
+	}
+
+	/**
+	 * 转换文件为UTF-16LE编码
+	 * 
+	 * @param filename
+	 *            被转换的文件的文件名
+	 */
+	public void translateToUTF16(String originalFilename, String targetFilename)
+			throws TranslateException {
+		translateToUTF16(new File(originalFilename), new File(targetFilename));
+	}
+
+	/**
+	 * 为转换所作的准备
+	 * 
+	 * @param originalFile
+	 *            原始文件
+	 * @param targetFile
+	 *            目标文件
+	 * @return 返回侦测出的原始文件的Charset
+	 */
+	private Charset readyForTranslate(File originalFile, File targetFile) {
+		verifyFile(originalFile);
+		verifyFile(targetFile);
+		return detector.charsetDetect(originalFile);
+	}
+
+	/**
+	 * 内部的转换代码
+	 * 
+	 * @param originalFile
+	 *            原始文件
+	 * @param targetFile
+	 *            目标文件
+	 * @param translator
+	 *            转换器
+	 */
+	private void internalTranslate(File originalFile, File targetFile,
+			Translator translator) {
 		InputStream reader = null;
 		OutputStream writer = null;
-		File tmpFile = getTempFile(file);
 		try {
-			reader = createReader(file);
-			writer = createWriter(tmpFile);
+			reader = createReader(originalFile);
+			writer = createWriter(targetFile);
 			byte[] buf = new byte[BUF_SIZE];
 			while (reader.read(buf) != -1) {
 				writeToDisk(writer, translator.tranlate(buf));
@@ -60,7 +150,6 @@ public class FileCharsetTranslator {
 			throw new TranslateException(e);
 		} finally {
 			try {
-				copyTmpFile2FormerFile(file,tmpFile);
 				reader.close();
 				writer.close();
 			} catch (IOException e) {
@@ -68,17 +157,6 @@ public class FileCharsetTranslator {
 			}
 
 		}
-
-	}
-
-	/**
-	 * 转换GB编码的文件为UTF-8
-	 * 
-	 * @param filename
-	 *            被转换的文件的文件名
-	 */
-	public void translateGB2UTF8(String filename) throws TranslateException {
-		translateToUTF8(new File(filename));
 	}
 
 	private void verifyFile(File file) throws TranslateException {
@@ -114,35 +192,6 @@ public class FileCharsetTranslator {
 			writer.flush();
 		} catch (IOException e) {
 			throw new TranslateException(e);
-		}
-	}
-
-	private File getTempFile(File file) {
-		return new File(System.getProperty("java.io.tmpdir") + File.separator
-				+ file.getName().substring(0, file.getName().indexOf(".") + 1) + "bak");
-	}
-	/**
-	 * 将临时文件拷贝为原有文件
-	 */
-	private void copyTmpFile2FormerFile(File formerFile , File tmpFile) throws TranslateException{
-		InputStream reader = createReader(tmpFile);
-		OutputStream writer = createWriter(new File(formerFile.getAbsolutePath()));
-		
-		byte[] buf = new byte[1024];
-		try {
-			while (reader.read(buf) != -1) {
-				writeToDisk(writer, translator.tranlate(buf));
-			}
-		} catch (IOException e) {
-			throw new TranslateException(e);
-		}finally{
-			
-			try {
-				reader.close();
-				writer.close();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
 		}
 	}
 

@@ -40,17 +40,20 @@ public abstract class Translator {
 	 * @throws TranslateException
 	 *             如果没找到指定编码的转换器;
 	 */
-	public static Translator getTranslator(Charset charset,
+	public static Translator getTranslator(Charset targetCharset,
 			Charset originalCharset) throws TranslateException {
+		targetCharset = Charsets.getSupportableCharset(targetCharset);
+		originalCharset = Charsets.getSupportableCharset(originalCharset);
 		Translator translator = null;
-		if (charset.equals(Charsets.GB18030) || charset.equals(Charsets.GBK)
-				|| charset.equals(Charsets.GB2312)) {
+		if (targetCharset.equals(Charsets.GB18030)
+				|| targetCharset.equals(Charsets.GBK)
+				|| targetCharset.equals(Charsets.GB2312)) {
 			translator = new GBTranslator();
-		} else if (charset.equals(Charsets.UTF8)) {
+		} else if (targetCharset.equals(Charsets.UTF8)) {
 			translator = new UTF8Translator();
-		} else if (charset.equals(Charsets.UTF16BE)
-				|| charset.equals(Charsets.UTF16LE)
-				|| charset.equals(Charsets.UTF16)) {
+		} else if (targetCharset.equals(Charsets.UTF16BE)
+				|| targetCharset.equals(Charsets.UTF16LE)
+				|| targetCharset.equals(Charsets.UTF16)) {
 			translator = new UnicodeTranslator();
 		} else {
 			throw new TranslateException("Cann't found a specify translator!");
