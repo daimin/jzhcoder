@@ -1,6 +1,11 @@
 package net.hncu.jzhcoder.translate;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import net.hncu.jzhcoder.utils.TranslateException;
 /**
  * UNICODE的集合数据结构
  * 注意：这里并未收录UTF-32
@@ -12,26 +17,52 @@ import java.nio.charset.Charset;
    2009-9-19   下午07:08:33
  */
 public abstract class Charsets {
-
-	public static Charset UTF16 = Charset.forName("UTF-16");
 	
-	public static Charset UTF16BE = Charset.forName("UTF-16BE");
+	private static Map<String,Charset> supportableCharsets ;
+	
+	public  final static Charset UTF16 = Charset.forName("UTF-16");
+	
+	public final static Charset UTF16BE = Charset.forName("UTF-16BE");
 	/**
 	 * Windows和Linux的默认Unicode字符集
 	 */
-	public static Charset UTF16LE = Charset.forName("UTF-16LE");
-	public static Charset UTF8 = Charset.forName("UTF-8");
+	public final static Charset UTF16LE = Charset.forName("UTF-16LE");
+	public final static Charset UTF8 = Charset.forName("UTF-8");
 	/**
 	 * 关于国标字符集，GB18030完全包含GBK，GBK完全包含GB2312
 	 */
-	public static Charset GB18030 = Charset.forName("GB18030");
-	public static Charset GBK = Charset.forName("GBK");
-	public static Charset GB2312 = Charset.forName("GB2312");
+	public final static Charset GB18030 = Charset.forName("GB18030");
+	public final static Charset GBK = Charset.forName("GBK");
+	public final static Charset GB2312 = Charset.forName("GB2312");
 	
-	public static Charset ASCII = Charset.forName("US-ASCII");
+	public final static Charset ASCII = Charset.forName("US-ASCII");
 	
-
+	public static Charset getSupportableCharset(String charset)throws TranslateException{
+		Charset resultCharset = getSupportableCharsets().get(charset);
+		if(resultCharset == null){
+			throw new TranslateException("Not supportable charset!");
+		}
+		return resultCharset;
+	}
 	
+	public static Charset getSupportableCharset(Charset charset) throws TranslateException{
+		return getSupportableCharset(charset.displayName());
+	}
 	
+	public static Map<String,Charset> getSupportableCharsets(){
+		if(supportableCharsets == null){
+			supportableCharsets = new HashMap<String, Charset>();
+			supportableCharsets.put(UTF16.displayName(), UTF16);
+			supportableCharsets.put(UTF16BE.displayName(), UTF16BE);
+			supportableCharsets.put(UTF16LE.displayName(), UTF16LE);
+			supportableCharsets.put(UTF8.displayName(), UTF8);
+			supportableCharsets.put(GB18030.displayName(), GB18030);
+			supportableCharsets.put(GBK.displayName(), GBK);
+			supportableCharsets.put(GB2312.displayName(), GB2312);
+			supportableCharsets.put(ASCII.displayName(), ASCII);
+		}
+		return Collections.unmodifiableMap(supportableCharsets);
+		
+	}
 
 }

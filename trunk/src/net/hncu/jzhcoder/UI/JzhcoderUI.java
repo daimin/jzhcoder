@@ -9,9 +9,12 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -28,6 +31,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -55,8 +59,16 @@ import javax.swing.table.TableModel;
 public class JzhcoderUI extends javax.swing.JFrame {
 	private JTabbedPane jTabbedPane1;
 	private JPanel jPanel1;
-	private JLabel jLabel4;
 	private JLabel jLabel8;
+	private JLabel jLabel4;
+	private JButton jButton1;
+	private JTable jTable1;
+	private JTextField jTextField3;
+	private JTextField jTextField2;
+	private JComboBox jComboBox6;
+	private JLabel jLabel12;
+	private JLabel jLabel11;
+	private JLabel jLabel10;
 	private JPanel jPanel5;
 	private JButton jButton17;
 	private JButton jButton16;
@@ -82,18 +94,21 @@ public class JzhcoderUI extends javax.swing.JFrame {
 	private JTable jTable2;
 	private JLabel jLabel5;
 	private JPanel jPanel3;
-	private JTable jTable1;
 	private JButton jButton3;
 	private JButton jButton2;
-	private JButton jButton1;
-	private JTextField jTextField1;
+	private JPasswordField jPasswordField1;
+	private JLabel jLabel1;
+	private JComboBox jComboBox8;
+	private JLabel jLabel14;
+	private JComboBox jComboBox7;
+	private JLabel jLabel13;
+	private JButton jButton18;
 	private JComboBox jComboBox3;
 	private JLabel jLabel3;
 	private JComboBox jComboBox2;
 	private JLabel jLabel2;
-	private JComboBox jComboBox1;
-	private JLabel jLabel1;
 	private JPanel jPanel2;
+	private Properties prop = null;
 
 	/**
 	 * Auto-generated main method to display this JFrame
@@ -110,6 +125,15 @@ public class JzhcoderUI extends javax.swing.JFrame {
 
 	public JzhcoderUI() {
 		super();
+		InputStream inputStream = this.getClass().getResourceAsStream(
+				"/res/dt.properties");
+		prop = new Properties();
+		try {
+			prop.load(inputStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		initGUI();
 	}
 
@@ -270,29 +294,14 @@ public class JzhcoderUI extends javax.swing.JFrame {
 					}
 				}
 				{
-					jPanel2 = new JPanel();
+				jPanel2 = new JPanel();
 					jTabbedPane1.addTab("数据转码", null, jPanel2, null);
 					jPanel2.setLayout(null);
 					{
-						jLabel1 = new JLabel();
-						jPanel2.add(jLabel1);
-						jLabel1.setText("\u6570\u636e\u5e93");
-						jLabel1.setBounds(12, 23, 48, 15);
-					}
-					{
-						ComboBoxModel jComboBox1Model = new DefaultComboBoxModel(
-								new String[] { "Oracle", "MySQL", "SQL Server",
-										"DB2", "ACCESS" });
-						jComboBox1 = new JComboBox();
-						jPanel2.add(jComboBox1);
-						jComboBox1.setModel(jComboBox1Model);
-						jComboBox1.setBounds(91, 19, 125, 22);
-					}
-					{
 						jLabel2 = new JLabel();
 						jPanel2.add(jLabel2);
-						jLabel2.setText("\u539f\u7f16\u7801");
-						jLabel2.setBounds(255, 23, 53, 15);
+						jLabel2.setText("\u539f\u7f16\u7801:");
+						jLabel2.setBounds(327, 302, 61, 21);
 					}
 					{
 						ComboBoxModel jComboBox2Model = new DefaultComboBoxModel(
@@ -301,13 +310,13 @@ public class JzhcoderUI extends javax.swing.JFrame {
 						jComboBox2 = new JComboBox();
 						jPanel2.add(jComboBox2);
 						jComboBox2.setModel(jComboBox2Model);
-						jComboBox2.setBounds(340, 19, 114, 22);
+						jComboBox2.setBounds(408, 301, 102, 22);
 					}
 					{
 						jLabel3 = new JLabel();
 						jPanel2.add(jLabel3);
-						jLabel3.setText("\u73b0\u7f16\u7801");
-						jLabel3.setBounds(501, 23, 52, 15);
+						jLabel3.setText("\u73b0\u7f16\u7801:");
+						jLabel3.setBounds(552, 303, 52, 20);
 					}
 					{
 						ComboBoxModel jComboBox3Model = new DefaultComboBoxModel(
@@ -316,45 +325,161 @@ public class JzhcoderUI extends javax.swing.JFrame {
 						jComboBox3 = new JComboBox();
 						jPanel2.add(jComboBox3);
 						jComboBox3.setModel(jComboBox3Model);
-						jComboBox3.setBounds(583, 19, 134, 22);
-					}
-					{
-						jTextField1 = new JTextField();
-						jPanel2.add(jTextField1);
-						jTextField1.setBounds(144, 102, 391, 22);
-					}
-					{
-						jLabel4 = new JLabel();
-						jPanel2.add(jLabel4);
-						jLabel4.setText("\u6587\u4ef6\u8def\u5f84");
-						jLabel4.setBounds(43, 106, 64, 15);
-					}
-					{
-						jButton1 = new JButton();
-						jPanel2.add(jButton1);
-						jButton1.setText("\u9009\u62e9");
-						jButton1.setBounds(567, 102, 68, 22);
+						jComboBox3.setBounds(629, 301, 106, 22);
 					}
 					{
 						jButton2 = new JButton();
 						jPanel2.add(jButton2);
 						jButton2.setText("\u8f6c\u6362");
-						jButton2.setBounds(583, 469, 71, 22);
+						jButton2.setBounds(583, 369, 71, 22);
 					}
 					{
 						jButton3 = new JButton();
 						jPanel2.add(jButton3);
 						jButton3.setText("\u91cd\u7f6e");
-						jButton3.setBounds(680, 469, 66, 22);
+						jButton3.setBounds(676, 369, 66, 22);
+					}
+					{
+						jLabel4 = new JLabel();
+						jPanel2.add(jLabel4);
+						jLabel4.setText("driver template:");
+						jLabel4.setBounds(20, 18, 122, 20);
+					}
+					{
+						jLabel10 = new JLabel();
+						jPanel2.add(jLabel10);
+						jLabel10.setText("Connection URL:");
+						jLabel10.setBounds(20, 69, 97, 15);
+					}
+					{
+						jLabel11 = new JLabel();
+						jPanel2.add(jLabel11);
+						jLabel11.setText("User name:");
+						jLabel11.setBounds(510, 21, 85, 15);
+					}
+					{
+						jLabel12 = new JLabel();
+						jPanel2.add(jLabel12);
+						jLabel12.setText("Password:");
+						jLabel12.setBounds(514, 69, 69, 15);
+					}
+					ComboBoxModel jComboBox6Model = null;
+					{
+						jComboBox6Model = new DefaultComboBoxModel(
+								new String[] { prop.get("MySQL").toString(),
+										prop.get("MSSQL").toString(),
+										prop.get("Oracle").toString() });
+						jComboBox6 = new JComboBox();
+						jComboBox6.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								JComboBox source = (JComboBox) e.getSource();
+								String currentItem = (String) source
+										.getSelectedItem();
+								if (currentItem == prop.get("MySQL").toString()) {
+									jTextField2.setText(prop
+											.getProperty("MySQL_Connector/J"));
+								} else if (currentItem == prop.get("MSSQL")
+										.toString()) {
+									jTextField2
+											.setText(prop
+													.getProperty("Microsoft_SQL_Server"));
+								} else if (currentItem == prop.get("Oracle")
+										.toString()) {
+									jTextField2
+											.setText(prop
+													.getProperty("Oracle(Thin_driver)"));
+								}
+							}
+
+						});
+						jPanel2.add(jComboBox6);
+						jComboBox6.setModel(jComboBox6Model);
+						jComboBox6.setBounds(152, 17, 334, 23);
+					}
+					{
+						jTextField2 = new JTextField();
+						jTextField2.setText(prop
+								.getProperty("MySQL_Connector/J"));
+						// if (jComboBox6Model.getSelectedItem().toString() ==
+						// "MySQL") {
+						// jTextField2.setText(prop
+						// .getProperty("MySQL_Connector/J"));
+						// } else if
+						// (jComboBox6Model.getSelectedItem().toString() ==
+						// "MSSQL") {
+						// jTextField2.setText(prop
+						// .getProperty("Microsoft_SQL_Server"));
+						// } else {
+						// jTextField2.setText(prop
+						// .getProperty("Oracle(Thin_driver)"));
+						// }
+						jPanel2.add(jTextField2);
+						jTextField2.setBounds(152, 67, 334, 20);
+					}
+					{
+						jTextField3 = new JTextField();
+						jPanel2.add(jTextField3);
+						jTextField3.setBounds(613, 19, 148, 20);
 					}
 					{
 						TableModel jTable1Model = new DefaultTableModel(
-								new String[][] { { "数据库状态，包括一些现有数据库，现在的编码等等" } },
+								new String[][] { { "" }, { "" }, { "" } },
 								new String[] { "Column 1" });
 						jTable1 = new JTable();
 						jPanel2.add(jTable1);
 						jTable1.setModel(jTable1Model);
-						jTable1.setBounds(72, 208, 594, 234);
+						jTable1.setBounds(20, 122, 616, 71);
+					}
+					{
+						jButton1 = new JButton();
+						jPanel2.add(jButton1);
+						jButton1.setText("Add Jars");
+						jButton1.setBounds(654, 122, 81, 23);
+					}
+					{
+						jButton18 = new JButton();
+						jPanel2.add(jButton18);
+						jButton18.setText("Remove");
+						jButton18.setBounds(654, 155, 81, 23);
+					}
+					{
+						jLabel13 = new JLabel();
+						jPanel2.add(jLabel13);
+						jLabel13.setText("Driver class name:");
+						jLabel13.setBounds(20, 234, 127, 23);
+					}
+					{
+						ComboBoxModel jComboBox7Model = new DefaultComboBoxModel(
+								new String[] { "", "" });
+						jComboBox7 = new JComboBox();
+						jPanel2.add(jComboBox7);
+						jComboBox7.setModel(jComboBox7Model);
+						jComboBox7.setBounds(174, 234, 561, 23);
+					}
+					{
+						jLabel14 = new JLabel();
+						jPanel2.add(jLabel14);
+						jLabel14.setText("Destination table:");
+						jLabel14.setBounds(20, 305, 122, 15);
+					}
+					{
+						ComboBoxModel jComboBox8Model = new DefaultComboBoxModel(
+								new String[] { "", "" });
+						jComboBox8 = new JComboBox();
+						jPanel2.add(jComboBox8);
+						jComboBox8.setModel(jComboBox8Model);
+						jComboBox8.setBounds(174, 301, 121, 23);
+					}
+					{
+						jLabel1 = new JLabel();
+						jPanel2.add(jLabel1);
+						jLabel1.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/zchcoder_logo.jpg")));
+						jLabel1.setBounds(10, 447, 175, 66);
+					}
+					{
+						jPasswordField1 = new JPasswordField();
+						jPanel2.add(jPasswordField1);
+						jPasswordField1.setBounds(613, 60, 148, 24);
 					}
 				}
 				{
