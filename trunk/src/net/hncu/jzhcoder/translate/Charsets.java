@@ -42,6 +42,7 @@ public abstract class Charsets {
 		if(resultCharset == null){
 			throw new TranslateException("Not supportable charset!");
 		}
+	System.out.println("Charset = " + resultCharset);	
 		return resultCharset;
 	}
 	

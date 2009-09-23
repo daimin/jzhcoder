@@ -55,4 +55,6 @@ public class UnicodeTranslator extends Translator{
 		return new String(bytes,Charsets.UTF16BE).getBytes(Charsets.UTF16LE);
 	}
 
+
+
 }

@@ -46,4 +46,5 @@ public class GBTranslator extends Translator{
 		.getBytes(Charsets.GB18030);
 	}
 
+
 }

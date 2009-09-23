@@ -14,8 +14,6 @@ import net.hncu.jzhcoder.utils.TranslateException;
  */
 public abstract class Translator {
 
-	protected Charset originalCharset = null;
-
 	Translator() {
 
 	}
@@ -28,22 +26,22 @@ public abstract class Translator {
 
 	public abstract byte[] translateFromUTF8(byte[] bytes)
 			throws TranslateException;
+	
+	public  byte[] translateAscii(byte[] bytes){
+		return bytes;
+	};
 
 	/**
 	 * 根据指定的字符集得到相应的转换器
 	 * 
 	 * @param charset
 	 *            指定的字符集
-	 * @param originalCharset
-	 *            文件的原始字符集
 	 * @return 转换器
 	 * @throws TranslateException
 	 *             如果没找到指定编码的转换器;
 	 */
-	public static Translator getTranslator(Charset targetCharset,
-			Charset originalCharset) throws TranslateException {
+	public static Translator getTranslator(Charset targetCharset) throws TranslateException {
 		targetCharset = Charsets.getSupportableCharset(targetCharset);
-		originalCharset = Charsets.getSupportableCharset(originalCharset);
 		Translator translator = null;
 		if (targetCharset.equals(Charsets.GB18030)
 				|| targetCharset.equals(Charsets.GBK)
@@ -55,11 +53,12 @@ public abstract class Translator {
 				|| targetCharset.equals(Charsets.UTF16LE)
 				|| targetCharset.equals(Charsets.UTF16)) {
 			translator = new UnicodeTranslator();
-		} else {
+		} else if(targetCharset.equals(Charsets.ASCII)){
+			translator = new DefaultTranslator();
+		}else{
 			throw new TranslateException("Cann't found a specify translator!");
 		}
 		if (translator != null) {
-			translator.originalCharset = originalCharset;
 			return translator;
 		}
 		return translator;
@@ -70,7 +69,8 @@ public abstract class Translator {
 	 * 
 	 * @param charset
 	 */
-	public byte[] tranlate(byte[] bytes) throws TranslateException {
+	public byte[] tranlate(Charset originalCharset, byte[] bytes) throws TranslateException {
+
 		if (originalCharset == null) {
 			throw new TranslateException();
 		}
@@ -84,7 +84,9 @@ public abstract class Translator {
 				|| originalCharset.equals(Charsets.UTF16LE)
 				|| originalCharset.equals(Charsets.UTF16)) {
 			return translateFromUnicode(bytes);
-		} else {
+		} else if(originalCharset.equals(Charsets.ASCII)){
+			return translateAscii(bytes);
+		} else{
 			throw new TranslateException("Cann't specify original charset!");
 		}
 	}

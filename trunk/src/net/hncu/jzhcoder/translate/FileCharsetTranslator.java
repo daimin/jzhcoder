@@ -38,11 +38,11 @@ public class FileCharsetTranslator {
 	 * @param file
 	 *            被转换的文件
 	 */
-	public void translateToUTF8(File originalFile, File targetFile)
+	public void translateToUTF8(File originalFile, File targetDir)
 			throws TranslateException {
-		Translator translator = Translator.getTranslator(Charsets.UTF8,
-				readyForTranslate(originalFile, targetFile));
-		internalTranslate(originalFile, targetFile, translator);
+		readyForTranslate(targetDir);
+		Translator translator = Translator.getTranslator(Charsets.UTF8);
+		internalTranslate(originalFile, targetDir, translator);
 
 	}
 
@@ -52,9 +52,9 @@ public class FileCharsetTranslator {
 	 * @param filename
 	 *            被转换的文件的文件名
 	 */
-	public void translateToUTF8(String originalFilename, String targetFilename,
+	public void translateToUTF8(String originalFilename, String targetDirname,
 			Charset targetCharset) throws TranslateException {
-		translateToUTF8(new File(originalFilename), new File(targetFilename));
+		translateToUTF8(new File(originalFilename), new File(targetDirname));
 	}
 
 	/**
@@ -64,11 +64,11 @@ public class FileCharsetTranslator {
 	 * @param targetFile
 	 * @throws TranslateException
 	 */
-	public void translateToGB(File originalFile, File targetFile)
+	public void translateToGB(File originalFile, File targetDir)
 			throws TranslateException {
-		Translator translator = Translator.getTranslator(Charsets.GB18030,
-				readyForTranslate(originalFile, targetFile));
-		internalTranslate(originalFile, targetFile, translator);
+		readyForTranslate(targetDir);
+		Translator translator = Translator.getTranslator(Charsets.GB18030);
+		internalTranslate(originalFile, targetDir, translator);
 	}
 
 	/**
@@ -77,9 +77,9 @@ public class FileCharsetTranslator {
 	 * @param filename
 	 *            被转换的文件的文件名
 	 */
-	public void translateToGB(String originalFilename, String targetFilename)
+	public void translateToGB(String originalFilename, String targetDirname)
 			throws TranslateException {
-		translateToGB(new File(originalFilename), new File(targetFilename));
+		translateToGB(new File(originalFilename), new File(targetDirname));
 	}
 
 	/**
@@ -87,14 +87,13 @@ public class FileCharsetTranslator {
 	 * 
 	 * @param originalFile
 	 * @param targetFile
-	 * @param targetCharset
 	 * @throws TranslateException
 	 */
-	public void translateToUTF16(File originalFile, File targetFile)
+	public void translateToUTF16(File originalFile, File targetDir)
 			throws TranslateException {
-		Translator translator = Translator.getTranslator(Charsets.UTF16LE,
-				readyForTranslate(originalFile, targetFile));
-		internalTranslate(originalFile, targetFile, translator);
+		readyForTranslate(targetDir);
+		Translator translator = Translator.getTranslator(Charsets.UTF16LE);
+		internalTranslate(originalFile, targetDir, translator);
 	}
 
 	/**
@@ -103,9 +102,9 @@ public class FileCharsetTranslator {
 	 * @param filename
 	 *            被转换的文件的文件名
 	 */
-	public void translateToUTF16(String originalFilename, String targetFilename)
+	public void translateToUTF16(String originalFilename, String targetDirname)
 			throws TranslateException {
-		translateToUTF16(new File(originalFilename), new File(targetFilename));
+		translateToUTF16(new File(originalFilename), new File(targetDirname));
 	}
 
 	/**
@@ -117,10 +116,14 @@ public class FileCharsetTranslator {
 	 *            目标文件
 	 * @return 返回侦测出的原始文件的Charset
 	 */
-	private Charset readyForTranslate(File originalFile, File targetFile) {
-		verifyFile(originalFile);
-		verifyFile(targetFile);
-		return detector.charsetDetect(originalFile);
+	private void readyForTranslate(File targetDir) throws TranslateException {
+		if (!targetDir.exists()) {
+			targetDir.mkdir();
+		}
+		if (targetDir.isFile()) {
+			throw new TranslateException("Target directory must be a directory!");
+		}
+
 	}
 
 	/**
@@ -133,16 +136,41 @@ public class FileCharsetTranslator {
 	 * @param translator
 	 *            转换器
 	 */
-	private void internalTranslate(File originalFile, File targetFile,
-			Translator translator) {
+	private void internalTranslate(File originalFile, File targetDir,
+			Translator translator) throws TranslateException {
+
+		if (originalFile == null && !originalFile.exists()) {
+			throw new TranslateException("original file don't exists!");
+		}
+		if (originalFile.isDirectory()) {
+			File[] files = originalFile.listFiles();
+			if (files == null || files.length < 1) {
+				return;
+			}
+			for (File f : files) {
+				internalTranslate(f, targetDir, translator);
+			}
+			return;
+		}
+		fileTranslate(originalFile,targetDir,translator);
+
+	}
+	/*
+	 * 文件的编码的转换
+	 */
+	private void fileTranslate(File originalFile,File targetDir,Translator translator){
 		InputStream reader = null;
 		OutputStream writer = null;
+		File targetFile = new File(targetDir.getAbsolutePath() + File.separator
+				+ originalFile.getName());
 		try {
 			reader = createReader(originalFile);
 			writer = createWriter(targetFile);
 			byte[] buf = new byte[BUF_SIZE];
 			while (reader.read(buf) != -1) {
-				writeToDisk(writer, translator.tranlate(buf));
+				writeToDisk(writer, translator.tranlate(Charsets
+						.getSupportableCharset(detector
+								.charsetDetect(originalFile)), buf));
 			}
 		} catch (FileNotFoundException e) {
 			throw new TranslateException(e);
@@ -156,12 +184,6 @@ public class FileCharsetTranslator {
 				throw new RuntimeException(e);
 			}
 
-		}
-	}
-
-	private void verifyFile(File file) throws TranslateException {
-		if (file == null && !file.exists()) {
-			throw new TranslateException();
 		}
 	}
 

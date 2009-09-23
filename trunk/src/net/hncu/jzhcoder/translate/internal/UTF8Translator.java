@@ -42,6 +42,7 @@ public class UTF8Translator extends Translator{
 		return new String(bytes, Charsets.UTF16LE)
 		.getBytes(Charsets.UTF8);
 	}
+	
 
 
 }
