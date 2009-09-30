@@ -7,6 +7,9 @@ import net.hncu.jzhcoder.utils.TranslateException;
 
 /**
  * 转换器的接口
+ * 我这里使用的转换方式是直接使用的String的getBytes(Charset charset)方法，非常简单。
+ * 因为我们是Java类库的客户程序员，所以我们能够使用这样一个简单的方法来达到复杂的功能。
+ * 而且，对于
  * 
  * @author vagasnail
  * 
@@ -53,7 +56,7 @@ public abstract class Translator {
 				|| targetCharset.equals(Charsets.UTF16LE)
 				|| targetCharset.equals(Charsets.UTF16)) {
 			translator = new UnicodeTranslator();
-		} else if(targetCharset.equals(Charsets.ASCII)){
+		} else if(targetCharset.equals(Charsets.ISO8859_1)){
 			translator = new DefaultTranslator();
 		}else{
 			throw new TranslateException("Cann't found a specify translator!");
@@ -84,10 +87,12 @@ public abstract class Translator {
 				|| originalCharset.equals(Charsets.UTF16LE)
 				|| originalCharset.equals(Charsets.UTF16)) {
 			return translateFromUnicode(bytes);
-		} else if(originalCharset.equals(Charsets.ASCII)){
+		} else if(originalCharset.equals(Charsets.ISO8859_1)){
 			return translateAscii(bytes);
 		} else{
 			throw new TranslateException("Cann't specify original charset!");
 		}
 	}
+	
+
 }

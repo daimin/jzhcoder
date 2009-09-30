@@ -11,7 +11,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import net.hncu.jzhcoder.translate.internal.FileCharsetDetector;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import net.hncu.jzhcoder.translate.chardet.FileCharsetDetector;
 import net.hncu.jzhcoder.translate.internal.Translator;
 import net.hncu.jzhcoder.utils.TranslateException;
 
@@ -23,7 +26,9 @@ import net.hncu.jzhcoder.utils.TranslateException;
  * 2009-9-20 ÉÏÎç09:14:45
  */
 public class FileCharsetTranslator {
-
+	
+	private static Log log = LogFactory.getLog(FileCharsetTranslator.class);
+	
 	public static final int BUF_SIZE = 1024;
 
 	private FileCharsetDetector detector;
@@ -40,6 +45,7 @@ public class FileCharsetTranslator {
 	 */
 	public void translateToUTF8(File originalFile, File targetDir)
 			throws TranslateException {
+		log.info("Translate to utf-8");
 		readyForTranslate(targetDir);
 		Translator translator = Translator.getTranslator(Charsets.UTF8);
 		internalTranslate(originalFile, targetDir, translator);
@@ -66,6 +72,7 @@ public class FileCharsetTranslator {
 	 */
 	public void translateToGB(File originalFile, File targetDir)
 			throws TranslateException {
+		log.info("Translate to gb18030");
 		readyForTranslate(targetDir);
 		Translator translator = Translator.getTranslator(Charsets.GB18030);
 		internalTranslate(originalFile, targetDir, translator);
@@ -91,6 +98,7 @@ public class FileCharsetTranslator {
 	 */
 	public void translateToUTF16(File originalFile, File targetDir)
 			throws TranslateException {
+		log.info("Translate to standard unicode utf-16le");
 		readyForTranslate(targetDir);
 		Translator translator = Translator.getTranslator(Charsets.UTF16LE);
 		internalTranslate(originalFile, targetDir, translator);
@@ -121,6 +129,7 @@ public class FileCharsetTranslator {
 			targetDir.mkdir();
 		}
 		if (targetDir.isFile()) {
+			log.error("Target directory must be a directory!");
 			throw new TranslateException("Target directory must be a directory!");
 		}
 
@@ -140,6 +149,7 @@ public class FileCharsetTranslator {
 			Translator translator) throws TranslateException {
 
 		if (originalFile == null && !originalFile.exists()) {
+			log.fatal("original file don't exists!");
 			throw new TranslateException("original file don't exists!");
 		}
 		if (originalFile.isDirectory()) {
@@ -173,14 +183,17 @@ public class FileCharsetTranslator {
 								.charsetDetect(originalFile)), buf));
 			}
 		} catch (FileNotFoundException e) {
+			log.fatal("original file don't exists!");
 			throw new TranslateException(e);
 		} catch (IOException e) {
+			log.fatal(e);
 			throw new TranslateException(e);
 		} finally {
 			try {
 				reader.close();
 				writer.close();
 			} catch (IOException e) {
+				log.fatal(e);
 				throw new RuntimeException(e);
 			}
 
@@ -193,6 +206,7 @@ public class FileCharsetTranslator {
 					new FileOutputStream(file));
 			return writer;
 		} catch (FileNotFoundException e) {
+			log.fatal(e);
 			throw new TranslateException(e);
 		}
 	}
@@ -203,6 +217,7 @@ public class FileCharsetTranslator {
 					new FileInputStream(file));
 			return reader;
 		} catch (FileNotFoundException e) {
+			log.fatal(e);
 			throw new TranslateException(e);
 		}
 	}
@@ -213,6 +228,7 @@ public class FileCharsetTranslator {
 			writer.write(bytes);
 			writer.flush();
 		} catch (IOException e) {
+			log.fatal(e);
 			throw new TranslateException(e);
 		}
 	}

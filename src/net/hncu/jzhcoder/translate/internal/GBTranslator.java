@@ -45,6 +45,4 @@ public class GBTranslator extends Translator{
 		return new String(bytes, Charsets.UTF16LE)
 		.getBytes(Charsets.GB18030);
 	}
-
-
 }

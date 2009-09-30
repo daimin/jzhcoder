@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.hncu.jzhcoder.utils.TranslateException;
 /**
  * UNICODE的集合数据结构
@@ -17,7 +20,8 @@ import net.hncu.jzhcoder.utils.TranslateException;
    2009-9-19   下午07:08:33
  */
 public abstract class Charsets {
-	
+	private static Log log = LogFactory.getLog(Charsets.class);
+
 	private static Map<String,Charset> supportableCharsets ;
 	
 	public  final static Charset UTF16 = Charset.forName("UTF-16");
@@ -35,14 +39,14 @@ public abstract class Charsets {
 	public final static Charset GBK = Charset.forName("GBK");
 	public final static Charset GB2312 = Charset.forName("GB2312");
 	
-	public final static Charset ASCII = Charset.forName("US-ASCII");
+	public final static Charset ISO8859_1 = Charset.forName("ISO-8859-1");
 	
 	public static Charset getSupportableCharset(String charset)throws TranslateException{
 		Charset resultCharset = getSupportableCharsets().get(charset);
 		if(resultCharset == null){
-			throw new TranslateException("Not supportable charset!");
+			log.error("Not a supportable charset!");
+			throw new TranslateException("Not a supportable charset!");
 		}
-	System.out.println("Charset = " + resultCharset);	
 		return resultCharset;
 	}
 	
@@ -60,7 +64,7 @@ public abstract class Charsets {
 			supportableCharsets.put(GB18030.displayName(), GB18030);
 			supportableCharsets.put(GBK.displayName(), GBK);
 			supportableCharsets.put(GB2312.displayName(), GB2312);
-			supportableCharsets.put(ASCII.displayName(), ASCII);
+			supportableCharsets.put(ISO8859_1.displayName(), ISO8859_1);
 		}
 		return Collections.unmodifiableMap(supportableCharsets);
 		
