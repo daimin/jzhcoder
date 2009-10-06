@@ -1,9 +1,13 @@
 package net.hncu.jzhcoder.db;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,16 +25,16 @@ public class MysqlHandler {
 
 	private static Log log = LogFactory.getLog(MysqlHandler.class);
 
-	public static String CHARACTER_SET_CLIENT = "character_set_client";
-	public static String CHARACTER_SET_CONNECTION = "character_set_connection";
-	public static String CHARACTER_SET_DATABASE = "character_set_database";
-	public static String CHARACTER_SET_RESULTS = "character_set_results";
-	public static String CHARACTER_SET_SERVER = "character_set_server";
-	public static String CHARACTER_SET_SYSTEM = "character_set_system";
+	public static final String CHARACTER_SET_CLIENT = "character_set_client";
+	public static final String CHARACTER_SET_CONNECTION = "character_set_connection";
+	public static final String CHARACTER_SET_DATABASE = "character_set_database";
+	public static final String CHARACTER_SET_RESULTS = "character_set_results";
+	public static final String CHARACTER_SET_SERVER = "character_set_server";
+	public static final String CHARACTER_SET_SYSTEM = "character_set_system";
 	/**
 	 * Mysql数据库的安装根目录。
 	 */
-	public static String BASEDIR = "basedir";
+	private String baseDir;
 
 	private Map<String, String> variables = null;
 
@@ -38,8 +42,14 @@ public class MysqlHandler {
 
 	private Connection conn;
 
+	private JDBCInfo info;
+
 	public void setConnection(Connection conn) {
 		this.conn = conn;
+	}
+
+	public MysqlHandler(JDBCInfo info) {
+		this.info = info;
 	}
 
 	/**
@@ -60,7 +70,6 @@ public class MysqlHandler {
 						+ clientCharset
 						+ " COLLATE "
 						+ getMysqlCharsets().get(clientCharset).DefaultCollation;
-				System.out.println(cmd);
 				stmt.execute(cmd);
 				log.info("Update mysql database's default character to "
 						+ clientCharset + " successfull!");
@@ -78,11 +87,26 @@ public class MysqlHandler {
 			}
 		}
 	}
+
 	/**
 	 * 备份数据库，预留。
 	 */
-	public void databaseDump() {
+	public void databaseDump(String distPath) {
+		String mysqlBinPath = getBaseDir() + "bin"
+				+ File.separator;
+		new Thread(new DumpData(mysqlBinPath, distPath)).start();
 
+	}
+
+	/**
+	 * 导入数据
+	 * 
+	 * @param srcFile
+	 */
+	public void databaseImport(String srcFile) {
+		String mysqlBinPath = getBaseDir() + "bin"
+				+ File.separator;
+		new Thread(new ImportData(mysqlBinPath, srcFile)).start();
 	}
 
 	/**
@@ -133,8 +157,42 @@ public class MysqlHandler {
 			throw new RuntimeException("该字符不支持中文字符，请选择中文字符集格式！");
 		}
 	}
+
 	/**
-	 * 取得必要的Mysql变量。
+	 * 取得数据库的安装目录
+	 */
+	public synchronized String getBaseDir() {
+		if (baseDir == null || baseDir.length() < 0) {
+			try {
+				Class.forName(info.getDriver());
+				Connection priConn = DriverManager.getConnection(info.getUrl()
+						+ "mysql", info.getUsername(), info.getPassword());
+				ResultSet rs = priConn.createStatement()
+				.executeQuery("show variables where variable_name='basedir'");
+				rs.next();
+				baseDir = rs.getString(2);
+				try{
+				}finally{
+					rs.close();
+					priConn.close();
+				}
+				return baseDir;
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+
+
+		}
+		return baseDir;
+
+
+	}
+
+	/**
+	 * 取得当前数据库的Mysql变量。
+	 * 
 	 * @return
 	 */
 	private synchronized Map<String, String> getMysqlVariables() {
@@ -148,16 +206,10 @@ public class MysqlHandler {
 				while (rs1.next()) {
 					variables.put(rs1.getString(1), rs1.getString(2));
 				}
-				ResultSet rs2 = stmt
-						.executeQuery(" show variables where variable_name='"
-								+ BASEDIR + "'");
-				rs2.next();
-				variables.put(rs2.getString(1), rs2.getString(2));
 				try {
 
 				} finally {
 					close(rs1);
-					close(rs2);
 					close(stmt);
 				}
 			} catch (SQLException e) {
@@ -213,11 +265,13 @@ public class MysqlHandler {
 			throw new RuntimeException(e);
 		}
 	}
+
 	/**
 	 * 表示Mysql的字符集
+	 * 
 	 * @author vagasnail
-	 *
-	   2009-9-29   下午04:20:25
+	 * 
+	 * 2009-9-29 下午04:20:25
 	 */
 	class MysqlCharset {
 		String Charset;
@@ -233,12 +287,160 @@ public class MysqlHandler {
 		}
 	}
 
+	class DumpData implements Runnable {
+		String binPath;
+		String distPath;
+
+		DumpData(String binPath, String distPath) {
+			this.binPath = binPath;
+			this.distPath = distPath;
+		}
+
+		@Override
+		public void run() {
+			try {
+				String[] cmdArray = null;
+				if (System.getProperty("os.name").matches(".*[Ww]indows.*")) {
+					String _baseDir = analyseBaseDir(binPath);
+					String cmd = _baseDir
+							+ "mysqldump --default-character-set="
+							+ MysqlHandler.this.getMysqlVariables().get(
+									CHARACTER_SET_DATABASE) + " -h"
+							+ info.getHostname() + " -u" + info.getUsername()
+							+ " -p" + info.getPassword() + " -B "
+							+ info.getDatabase() + " > " + distPath
+							+ info.getDatabase() + "_bak.sql";
+					cmdArray = new String[] { "cmd", "/c", cmd };
+				} else {
+					String cmd = binPath
+							+ "mysqldump --default-character-set="
+							+ MysqlHandler.this.getMysqlVariables().get(
+									CHARACTER_SET_DATABASE) + " -h"
+							+ info.getHostname() + " -u" + info.getUsername()
+							+ " -p" + info.getPassword() + " -B "
+							+ info.getDatabase() + " > " + distPath
+							+ info.getDatabase() + "_bak.sql";
+					cmdArray = new String[] { "sh", "-c", cmd };
+				}
+				log.info(Arrays.toString(cmdArray));
+				Process p = Runtime.getRuntime().exec(cmdArray);
+				// if (p.waitFor() != 0) {
+				// if (p.exitValue() == 1)// p.exitValue()==0表示正常结束，1：非正常结束
+				// log.error("perform failed!");
+				// }
+				p.waitFor();
+				p.destroy();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+	/**
+	 * 分析系统路径，并作相应的处理。
+	 * 
+	 * @param baseDir
+	 * @return
+	 */
+	private String analyseBaseDir(String baseDir) {
+		String[] dirs = baseDir.split("\\\\");
+		StringBuilder newStr = new StringBuilder();
+		if (baseDir != null) {
+			for (int i = 0; i < dirs.length; i++) {
+				if (dirs[i].contains(" ")) {
+
+					dirs[i] = "\"" + dirs[i] + "\"";
+
+				}
+				newStr.append(dirs[i] + File.separator);
+			}
+		}
+		return newStr.toString();
+	}
+
+	/**
+	 * 使用客户指定的编码，导入数据到数据库
+	 * 
+	 * @author vagasnail
+	 * 
+	 * 2009-10-5 下午05:02:06
+	 */
+	class ImportData implements Runnable {
+		String binPath;
+		String srcFile;
+
+		ImportData(String binPath, String srcFile) {
+			this.binPath = binPath;
+			this.srcFile = srcFile;
+		}
+
+		@Override
+		public void run() {
+			try {
+				String[] cmdArray = null;
+				if (System.getProperty("os.name").matches(".*[Ww]indows.*")) {
+					String _baseDir = analyseBaseDir(binPath);
+					String cmd = _baseDir + "mysql -h" + info.getHostname()
+							+ " -u" + info.getUsername() + " -p"
+							+ info.getPassword() + " < " + srcFile
+							+ " -f --default-character-set="
+							+ info.getCharacterEncoding();
+					cmdArray = new String[] { "cmd", "/c", cmd };
+				} else {
+					String cmd = binPath + "mysql -h" + info.getHostname()
+							+ " -u" + info.getUsername() + " -p"
+							+ info.getPassword() + " < " + srcFile
+							+ " -f --default-character-set="
+							+ info.getCharacterEncoding();
+					cmdArray = new String[] { "sh", "-c", cmd };
+				}
+				log.info(Arrays.toString(cmdArray));
+				Process p = Runtime.getRuntime().exec(cmdArray);
+				// if (p.waitFor() != 0) {
+				// if (p.exitValue() == 1)// p.exitValue()==0表示正常结束，1：非正常结束
+				// log.error("perform failed!");
+				// }
+				p.waitFor();
+				p.destroy();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
 	public static void main(String[] args) throws SQLException {
-		MysqlHandler handler = new MysqlHandler();
-		handler.setConnection(MysqlTest.conn);
-		handler.handleDatabaseCharacter("gbk");
-		handler.close();
+		JDBCInfo info = new JDBCInfo();
+		info.setUsername("root");
+		info.setPassword("2536");
+		info.setDriver("com.mysql.jdbc.Driver");
+		info.setUrl("jdbc:mysql://localhost:3306/");
+		info.setDatabase("my_db");
+		info.setUseUnicode(true);
+		info.setCharacterEncoding("GBK");
+		MysqlHandler handler = new MysqlHandler(info);
+//		handler.setConnection(MysqlTest.conn);
+//		handler.setInfo(MysqlTest.info);
+		// handler.handleDatabaseCharacter("gbk");
+		// handler.close();
+		// handler.databaseDump("D:\\");
 		// System.out.println(handler.getMysqlVariables());
+		handler.databaseImport("D:\\my_db_bak.sql");
+	}
+
+	public Map<String, String> getVariables() {
+		return getMysqlVariables();
+	}
+
+	public void setInfo(JDBCInfo info) {
+		this.info = info;
 	}
 
 }

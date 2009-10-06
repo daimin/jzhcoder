@@ -2,7 +2,11 @@ package net.hncu.jzhcoder.translate.internal;
 
 import java.nio.charset.Charset;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import net.hncu.jzhcoder.translate.Charsets;
+import net.hncu.jzhcoder.translate.FileCharsetTranslator;
 import net.hncu.jzhcoder.utils.TranslateException;
 
 /**
@@ -16,7 +20,7 @@ import net.hncu.jzhcoder.utils.TranslateException;
  * 2009-9-20 上午10:09:00
  */
 public abstract class Translator {
-
+	private static Log log = LogFactory.getLog(FileCharsetTranslator.class);
 	Translator() {
 
 	}
@@ -44,6 +48,7 @@ public abstract class Translator {
 	 *             如果没找到指定编码的转换器;
 	 */
 	public static Translator getTranslator(Charset targetCharset) throws TranslateException {
+		log.info("Get a charset translator through a specifiy charset.");
 		targetCharset = Charsets.getSupportableCharset(targetCharset);
 		Translator translator = null;
 		if (targetCharset.equals(Charsets.GB18030)
@@ -59,6 +64,7 @@ public abstract class Translator {
 		} else if(targetCharset.equals(Charsets.ISO8859_1)){
 			translator = new DefaultTranslator();
 		}else{
+			log.error("Cann't found a specify translator!");
 			throw new TranslateException("Cann't found a specify translator!");
 		}
 		if (translator != null) {
@@ -73,8 +79,9 @@ public abstract class Translator {
 	 * @param charset
 	 */
 	public byte[] tranlate(Charset originalCharset, byte[] bytes) throws TranslateException {
-
+		log.info("Begin tranlate.");
 		if (originalCharset == null) {
+			log.error("original Charset cann't be null!");
 			throw new TranslateException();
 		}
 		if (originalCharset.equals(Charsets.GB18030)
@@ -90,6 +97,7 @@ public abstract class Translator {
 		} else if(originalCharset.equals(Charsets.ISO8859_1)){
 			return translateAscii(bytes);
 		} else{
+			log.error("Cann't specify original charset!");
 			throw new TranslateException("Cann't specify original charset!");
 		}
 	}
